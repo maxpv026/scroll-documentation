@@ -1,34 +1,41 @@
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".click-to-zoom").forEach((element: HTMLImageElement) => {
+  document.querySelectorAll(".click-to-zoom").forEach((element) => {
     element.addEventListener("click", () => {
-      if (element.classList.contains("expanded")) return
+      if (element.classList.contains("expanded")) return;
 
-      element.classList.add("expanded")
-      // create wrapper for preview
-      const wrapper = document.createElement("div")
-      wrapper.id = "expanded-image-wrapper"
+      const imgSrc = element.src;
+      const wrapper = createImageWrapper(imgSrc);
 
-      // create image node
-      const img = document.createElement("img")
-      img.src = element.src
-      img.className = "expanded"
-      img.id = "expanded-image-preview"
-      wrapper.appendChild(img)
+      const closePreview = () => {
+        wrapper.remove();
+        element.classList.remove("expanded");
+        document.removeEventListener("click", closePreview);
+        document.removeEventListener("keyup", closeOnEscape);
+      };
 
-      // setup events to close the preview
-      wrapper.onclick = () => {
-        wrapper.remove()
-        element.classList.remove("expanded")
-      }
-      document.onkeyup = (e) => {
+      const closeOnEscape = (e) => {
         if (e.key === "Escape") {
-          wrapper.remove()
-          element.classList.remove("expanded")
+          closePreview();
         }
-      }
+      };
 
-      // add the wrapper to the DOM
-      element.insertAdjacentElement("afterend", wrapper)
-    })
-  })
-})
+      document.addEventListener("click", closePreview);
+      document.addEventListener("keyup", closeOnEscape);
+
+      element.insertAdjacentElement("afterend", wrapper);
+    });
+  });
+});
+
+function createImageWrapper(imgSrc) {
+  const wrapper = document.createElement("div");
+  wrapper.id = "expanded-image-wrapper";
+
+  const img = document.createElement("img");
+  img.src = imgSrc;
+  img.className = "expanded";
+  img.id = "expanded-image-preview";
+  wrapper.appendChild(img);
+
+  return wrapper;
+}
